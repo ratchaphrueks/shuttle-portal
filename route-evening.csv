@@ -1,0 +1,5 @@
+seq,name,time,lat,lon,image,landmark,gmaps
+1,Bangpoo Plant - Factory Gate 2,17:30,13.5890,100.6155,https://images.unsplash.com/photo-1565793298595-6a879b1d9492?w=600&q=60,Departure point. Wait inside Gate 2 turnstiles.,https://www.google.com/maps?q=13.5890,100.6155
+2,Bangpoo Industrial Estate,17:45,13.6010,100.6210,https://images.unsplash.com/photo-1565008447742-97f6f38c985c?w=600&q=60,"Main gate security booth, shuttle stops on the outbound lane.",https://www.google.com/maps?q=13.6010,100.6210
+3,Mega Bangna,17:58,13.6420,100.6520,https://images.unsplash.com/photo-1519642918688-7e43b19245d8?w=600&q=60,"Bus bay near the Starbucks entrance, opposite the main car park.",https://www.google.com/maps?q=13.6420,100.6520
+4,Bangna BTS,18:10,13.6685,100.6047,https://images.unsplash.com/photo-1556122071-e404eaedb77f?w=600&q=60,"Drop-off at Exit 1, opposite the taxi stand.",https://www.google.com/maps?q=13.6685,100.6047
