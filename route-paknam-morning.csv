@@ -1,0 +1,6 @@
+seq,name,time,lat,lon,image,landmark,gmaps
+1,Paknam BTS Station,06:15,13.6047,100.4889,https://images.unsplash.com/photo-1556122071-e404eaedb77f?w=600&q=60,"Main exit A. Look for blue shuttle sign near the taxi stand.",https://www.google.com/maps?q=13.6047,100.4889
+2,Paknam Market,06:28,13.5980,100.5120,https://images.unsplash.com/photo-1519642918688-7e43b19245d8?w=600&q=60,"Central market area, shuttle stop opposite 7-Eleven.",https://www.google.com/maps?q=13.5980,100.5120
+3,Samrong Road Intersection,06:42,13.5890,100.5450,https://images.unsplash.com/photo-1565008447742-97f6f38c985c?w=600&q=60,"Major intersection, near the traffic signal. Stand on the north side.",https://www.google.com/maps?q=13.5890,100.5450
+4,Samet Chachoengsao Bridge,06:55,13.5750,100.5850,https://images.unsplash.com/photo-1565793298595-6a879b1d9492?w=600&q=60,"Bridge overpass, shuttle bay on the inbound lane.",https://www.google.com/maps?q=13.5750,100.5850
+5,Bangpoo Industrial Estate,07:10,13.6010,100.6210,https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=600&q=60,"Main gate security booth, final stop.",https://www.google.com/maps?q=13.6010,100.6210

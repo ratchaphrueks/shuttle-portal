@@ -1,0 +1,4 @@
+seq,name,time,lat,lon,image,landmark,gmaps
+1,Praeksa Market,14:00,13.7120,100.5680,https://images.unsplash.com/photo-1556122071-e404eaedb77f?w=600&q=60,"Market entrance near the central plaza. Shuttle departs from the east parking lot.",https://www.google.com/maps?q=13.7120,100.5680
+2,Praeksa Industrial Complex,14:20,13.6890,100.5920,https://images.unsplash.com/photo-1519642918688-7e43b19245d8?w=600&q=60,"Factory zone entrance. Wait at the blue shuttle shelter.",https://www.google.com/maps?q=13.6890,100.5920
+3,Bangpoo Industrial Estate,14:35,13.6010,100.6210,https://images.unsplash.com/photo-1565008447742-97f6f38c985c?w=600&q=60,"Main gate security booth, final destination.",https://www.google.com/maps?q=13.6010,100.6210
