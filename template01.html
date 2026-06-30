@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Employee Shuttle Portal — Template</title>
+
+<!-- Leaflet (OpenStreetMap) — no API key required -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+  :root{
+    --navy:#1A2B4C;
+    --navy-soft:#2C4070;
+    --amber:#F0A847;
+    --amber-dark:#C97F1F;
+    --green:#3DA35D;
+    --gray:#94A3B8;
+    --bg:#F7F8FA;
+    --card:#FFFFFF;
+    --text:#1E2430;
+    --text-soft:#6B7280;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased;
+  }
+  header{
+    background:var(--navy); color:white; padding:18px 20px;
+    display:flex; align-items:center; gap:14px;
+  }
+  header .logo{
+    width:38px;height:38px;border-radius:10px; background:var(--amber);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;color:var(--navy);font-size:18px;flex-shrink:0;
+  }
+  header .titles h1{ font-size:16px; margin:0; font-weight:700; letter-spacing:.2px; }
+  header .titles p{ margin:2px 0 0; font-size:12.5px; color:#B9C3DA; }
+  header .route-pill{
+    margin-left:auto; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.18);
+    padding:6px 12px; border-radius:999px; font-size:12.5px; white-space:nowrap;
+  }
+  main{
+    display:grid; grid-template-columns: 1.3fr 1fr; gap:16px;
+    padding:16px; max-width:1280px; margin:0 auto;
+  }
+  @media (max-width: 880px){ main{ grid-template-columns: 1fr; } }
+  .panel{
+    background:var(--card); border-radius:var(--radius);
+    box-shadow:0 1px 2px rgba(16,24,40,.04), 0 1px 8px rgba(16,24,40,.04);
+    overflow:hidden;
+  }
+  #map{ height:420px; width:100%; }
+  .map-wrap .panel-label{
+    padding:12px 16px 0; font-size:13px; font-weight:700; color:var(--navy);
+    letter-spacing:.3px; text-transform:uppercase;
+  }
+  .timeline-wrap{ padding:16px; }
+  .timeline-wrap .panel-label{
+    font-size:13px;font-weight:700;color:var(--navy);
+    text-transform:uppercase;letter-spacing:.3px;margin-bottom:14px;
+  }
+  .rail{ position:relative; padding-left:26px; }
+  .rail::before{
+    content:""; position:absolute; left:9px; top:6px; bottom:6px;
+    width:3px; background:var(--gray); border-radius:3px;
+  }
+  .stop{ position:relative; padding:0 0 22px 14px; cursor:pointer; }
+  .stop:last-child{ padding-bottom:0; }
+  .stop::before{
+    content:""; position:absolute; left:-26px; top:2px;
+    width:18px; height:18px; border-radius:50%;
+    background:var(--gray); border:3px solid var(--card);
+    box-shadow:0 0 0 2px var(--gray); transition:.15s;
+  }
+  .stop.passed::before{ background:var(--green); box-shadow:0 0 0 2px var(--green); }
+  .stop.active::before{
+    background:var(--amber); box-shadow:0 0 0 3px var(--amber);
+    width:20px;height:20px;left:-27px;top:0;
+  }
+  .stop .time{ font-weight:700; font-size:15px; color:var(--navy); }
+  .stop.active .time{ color:var(--amber-dark); }
+  .stop .name{ font-size:13.5px; color:var(--text-soft); margin-top:1px; }
+  .stop.active .name{ color:var(--text); font-weight:600; }
+  .stop .status-tag{
+    display:inline-block; margin-top:5px; font-size:10.5px; font-weight:700;
+    letter-spacing:.3px; padding:2px 8px; border-radius:999px;
+    background:#EEF1F6; color:var(--text-soft);
+  }
+  .stop.active .status-tag{ background:#FDF1DF; color:var(--amber-dark); }
+  .stop.passed .status-tag{ background:#E6F4EA; color:var(--green); }
+  .stop:hover .name{ color:var(--navy); }
+  .detail{ grid-column: 1 / -1; padding:18px; }
+  .detail-inner{ display:grid; grid-template-columns: 280px 1fr; gap:18px; }
+  @media (max-width:640px){ .detail-inner{ grid-template-columns: 1fr; } }
+  .detail-photo{ width:100%; height:190px; border-radius:10px; object-fit:cover; background:#E5E8ED; }
+  .detail-eyebrow{
+    font-size:11.5px; font-weight:700; color:var(--amber-dark);
+    text-transform:uppercase; letter-spacing:.4px; margin-bottom:4px;
+  }
+  .detail-name{ font-size:21px; font-weight:800; color:var(--navy); margin:0 0 10px; }
+  .detail-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:12px; }
+  .detail-field label{
+    display:block; font-size:11px; color:var(--text-soft);
+    text-transform:uppercase; letter-spacing:.3px; margin-bottom:3px;
+  }
+  .detail-field div{ font-size:14.5px; font-weight:600; color:var(--text); }
+  .detail-actions{ display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; }
+  .btn{ border:none; cursor:pointer; padding:10px 16px; border-radius:10px; font-size:13.5px; font-weight:700; display:inline-flex; align-items:center; gap:6px; }
+  .btn-primary{ background:var(--navy); color:white; }
+  .btn-primary:hover{ background:var(--navy-soft); }
+  .btn-ghost{ background:#EEF1F6; color:var(--navy); }
+  .btn-ghost:hover{ background:#E2E6ED; }
+  footer{ text-align:center; padding:18px; font-size:12px; color:var(--text-soft); }
+  .marker-pin{
+    background:var(--gray); color:white; font-weight:700; font-size:11px;
+    width:26px;height:26px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    border:3px solid white; box-shadow:0 1px 4px rgba(0,0,0,.3);
+  }
+  .marker-pin.active{ background:var(--amber); color:var(--navy); width:32px;height:32px;font-size:12.5px; }
+  .marker-pin.passed{ background:var(--green); }
+  .leaflet-popup-content{ font-family:inherit; font-size:13px; min-width:160px; }
+  .leaflet-popup-content b{ color:var(--navy); }
+  .load-state{ padding:40px 16px; text-align:center; color:var(--text-soft); font-size:14px; }
+  .load-state.error{ color:#B42318; }
+</style>
+</head>
+<body>
+
+<!-- ======================================================================
+     CONFIG ZONE #1 — HEADER TEXT
+     Edit these three lines per route. Nothing else in <header> needs to change.
+     ====================================================================== -->
+<header>
+  <div class="logo">B</div>
+  <div class="titles">
+    <h1>Employee Shuttle</h1>                          <!-- CONFIG: company/portal name -->
+    <p>Bangna → Bangpoo Plant · Morning Route</p>       <!-- CONFIG: route description -->
+  </div>
+  <div class="route-pill" id="nextStopPill">Loading…</div>
+</header>
+
+<main>
+  <div class="panel map-wrap">
+    <div class="panel-label">Route map</div>
+    <div id="map"></div>
+  </div>
+
+  <div class="panel timeline-wrap">
+    <div class="panel-label">Pickup timeline</div>
+    <div class="rail" id="rail"><div class="load-state">Loading route…</div></div>
+  </div>
+
+  <div class="panel detail" id="detailCard"></div>
+</main>
+
+<footer>
+  Tap any stop on the map or timeline to see pickup details · Times are estimates, please arrive 5 minutes early
+</footer>
+
+<script>
+/* ============================================================================
+   ENGINE — do not edit below this line for a normal route change.
+   This whole script reads from one variable: CSV_FILE. Everything else
+   (map, polyline, timeline, detail card, marker colors) is generated from
+   whatever rows that CSV contains. See the bottom of the file for the
+   one line you DO touch when switching routes.
+   ============================================================================ */
+
+/* --------------------------------------------------------------------------
+   1. CSV PARSER
+   Converts raw CSV text into an array of row objects. Assumes the header
+   row names exactly match the columns this engine expects:
+   seq,name,time,lat,lon,image,landmark,gmaps
+   If you add a new column (e.g. "notes"), it will be parsed automatically
+   into each row object — but you still need to add a line in renderDetail()
+   if you want it to actually appear on screen (see CONFIG ZONE #3).
+   -------------------------------------------------------------------------- */
+function parseCSV(text){
+  const rows = [];
+  const lines = text.trim().split(/\r?\n/);
+  const headers = splitCSVLine(lines[0]);
+
+  for (let i = 1; i < lines.length; i++){
+    if (!lines[i].trim()) continue;
+    const cells = splitCSVLine(lines[i]);
+    const row = {};
+    headers.forEach((h, idx) => row[h.trim()] = (cells[idx] || '').trim());
+    rows.push(row);
+  }
+  return rows;
+}
+
+// Handles quoted fields containing commas, e.g. "Exit 1, near taxi stand"
+function splitCSVLine(line){
+  const result = [];
+  let cur = '', inQuotes = false;
+  for (let i = 0; i < line.length; i++){
+    const c = line[i];
+    if (c === '"'){ inQuotes = !inQuotes; continue; }
+    if (c === ',' && !inQuotes){ result.push(cur); cur = ''; continue; }
+    cur += c;
+  }
+  result.push(cur);
+  return result;
+}
+
+/* --------------------------------------------------------------------------
+   2. ROW -> STOP OBJECT
+   Converts raw CSV string values into the typed object the rest of the
+   engine expects (numbers for seq/lat/lon, everything else stays text).
+   -------------------------------------------------------------------------- */
+function rowToStop(row){
+  return {
+    seq: Number(row.seq),
+    name: row.name,
+    time: row.time,
+    lat: Number(row.lat),
+    lon: Number(row.lon),
+    image: row.image,
+    landmark: row.landmark,
+    gmaps: row.gmaps
+  };
+}
+
+/* --------------------------------------------------------------------------
+   3. RUNTIME STATE
+   -------------------------------------------------------------------------- */
+let ROUTE = { stops: [] };
+let map, polyline, markers = [];
+let selectedSeq = null;
+
+function timeToMinutes(t){
+  const [h,m] = t.split(":").map(Number);
+  return h*60+m;
+}
+
+function getStopStatus(stop){
+  const now = new Date();
+  const nowMin = now.getHours()*60 + now.getMinutes();
+  const stopMin = timeToMinutes(stop.time);
+  // Demo clock: outside actual shuttle hours, fall back to a fixed
+  // reference time so the page still demonstrates passed/upcoming states.
+  const effectiveNow = (nowMin >= 360 && nowMin <= 480) ? nowMin : timeToMinutes("06:38");
+  return stopMin < effectiveNow ? "passed" : "future";
+}
+
+/* --------------------------------------------------------------------------
+   4. MAP RENDERING — reads ROUTE.stops, builds markers + polyline
+   -------------------------------------------------------------------------- */
+function initMap(){
+  map = L.map('map', { zoomControl: true, attributionControl: true });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  const latlngs = ROUTE.stops.map(s => [s.lat, s.lon]);
+  polyline = L.polyline(latlngs, { color:'#1A2B4C', weight:4, opacity:.55, dashArray:'1,8' }).addTo(map);
+  map.fitBounds(latlngs, { padding:[40,40] });
+
+  ROUTE.stops.forEach(stop => {
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="marker-pin" id="pin-${stop.seq}">${stop.seq}</div>`,
+      iconSize:[26,26],
+      iconAnchor:[13,13]
+    });
+    const marker = L.marker([stop.lat, stop.lon], { icon }).addTo(map);
+    marker.bindPopup(`<b>${stop.name}</b><br>Arrival: ${stop.time}`);
+    marker.on('click', () => selectStop(stop.seq));
+    markers.push({ seq: stop.seq, marker });
+  });
+}
+
+/* --------------------------------------------------------------------------
+   5. TIMELINE RENDERING
+   -------------------------------------------------------------------------- */
+function renderTimeline(){
+  const rail = document.getElementById('rail');
+  rail.innerHTML = '';
+  ROUTE.stops.forEach(stop => {
+    const status = getStopStatus(stop);
+    const isActive = stop.seq === selectedSeq;
+    const el = document.createElement('div');
+    el.className = `stop ${status} ${isActive ? 'active' : ''}`;
+    el.dataset.seq = stop.seq;
+    el.innerHTML = `
+      <div class="time">${stop.time}</div>
+      <div class="name">${stop.name}</div>
+      <span class="status-tag">${status === 'passed' ? 'Departed' : (isActive ? 'Selected' : 'Upcoming')}</span>
+    `;
+    el.addEventListener('click', () => selectStop(stop.seq));
+    rail.appendChild(el);
+  });
+}
+
+/* --------------------------------------------------------------------------
+   6. DETAIL CARD RENDERING
+   ----------------------------------------------------------------------
+   CONFIG ZONE #3 — if you add a new CSV column (e.g. "notes" or
+   "bus_number") and want it visible on screen, add one <div class=
+   "detail-field"> block here following the existing pattern. Nothing
+   above this function needs to change for that.
+   -------------------------------------------------------------------------- */
+function renderDetail(stop){
+  const card = document.getElementById('detailCard');
+  card.innerHTML = `
+    <div class="detail-inner">
+      <img class="detail-photo" src="${stop.image}" alt="${stop.name} surroundings">
+      <div>
+        <div class="detail-eyebrow">Pickup ${stop.seq} of ${ROUTE.stops.length}</div>
+        <h2 class="detail-name">${stop.name}</h2>
+        <div class="detail-grid">
+          <div class="detail-field">
+            <label>Arrival time</label>
+            <div>${stop.time}</div>
+          </div>
+          <div class="detail-field">
+            <label>Landmark</label>
+            <div>${stop.landmark}</div>
+          </div>
+          <!-- CONFIG ZONE #3: add new <div class="detail-field"> blocks here
+               for any additional CSV columns, e.g.:
+          <div class="detail-field">
+            <label>Bus number</label>
+            <div>${stop.bus_number}</div>
+          </div>
+          -->
+        </div>
+        <div class="detail-actions">
+          <a class="btn btn-primary" href="${stop.gmaps}" target="_blank" rel="noopener">Open in Google Maps</a>
+          <button class="btn btn-ghost" id="useLocationBtn">Use my location</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('useLocationBtn').addEventListener('click', () => locateMe(stop));
+}
+
+function locateMe(stop){
+  if (!navigator.geolocation){ alert('Location is not available on this device/browser.'); return; }
+  navigator.geolocation.getCurrentPosition(pos => {
+    const d = distanceMeters(pos.coords.latitude, pos.coords.longitude, stop.lat, stop.lon);
+    alert(`You are approximately ${Math.round(d)}m from ${stop.name}.`);
+  }, () => alert('Could not get your location.'));
+}
+
+function distanceMeters(lat1,lon1,lat2,lon2){
+  const R = 6371000;
+  const toRad = d => d*Math.PI/180;
+  const dLat = toRad(lat2-lat1), dLon = toRad(lon2-lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+  return R * 2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function updateMarkerStyles(){
+  ROUTE.stops.forEach(stop => {
+    const pin = document.getElementById(`pin-${stop.seq}`);
+    if (!pin) return;
+    pin.classList.remove('active','passed');
+    const status = getStopStatus(stop);
+    if (stop.seq === selectedSeq) pin.classList.add('active');
+    else if (status === 'passed') pin.classList.add('passed');
+  });
+}
+
+function updateNextStopPill(){
+  const next = ROUTE.stops.find(s => getStopStatus(s) === 'future') || ROUTE.stops[ROUTE.stops.length-1];
+  document.getElementById('nextStopPill').textContent = `Next: ${next.name} · ${next.time}`;
+}
+
+function selectStop(seq){
+  selectedSeq = seq;
+  const stop = ROUTE.stops.find(s => s.seq === seq);
+  renderTimeline();
+  renderDetail(stop);
+  updateMarkerStyles();
+  const m = markers.find(m => m.seq === seq);
+  if (m){ map.panTo(m.marker.getLatLng()); m.marker.openPopup(); }
+}
+
+/* --------------------------------------------------------------------------
+   7. BOOTSTRAP — fetches the CSV, parses it, builds ROUTE, then renders.
+   -------------------------------------------------------------------------- */
+function init(){
+  fetch(CSV_FILE)
+    .then(res => {
+      if (!res.ok) throw new Error(`Could not load ${CSV_FILE} (HTTP ${res.status})`);
+      return res.text();
+    })
+    .then(text => {
+      const rows = parseCSV(text);
+      if (rows.length === 0) throw new Error('CSV loaded but contained no data rows.');
+      ROUTE.stops = rows.map(rowToStop).sort((a,b) => a.seq - b.seq);
+      selectedSeq = ROUTE.stops[0].seq;
+
+      initMap();
+      renderTimeline();
+      renderDetail(ROUTE.stops[0]);
+      updateMarkerStyles();
+      updateNextStopPill();
+    })
+    .catch(err => {
+      document.getElementById('rail').innerHTML =
+        `<div class="load-state error">Failed to load route data.<br>${err.message}</div>`;
+      console.error(err);
+    });
+}
+
+/* ============================================================================
+   CONFIG ZONE #2 — THE ONE LINE YOU CHANGE TO SWITCH ROUTES
+   Point this at any CSV file with the columns:
+   seq,name,time,lat,lon,image,landmark,gmaps
+   Example for a different route: const CSV_FILE = "routes/evening-bangpoo.csv";
+   ============================================================================ */
+const CSV_FILE = "route.csv";
+
+window.addEventListener('load', init);
+</script>
+
+</body>
+</html>
